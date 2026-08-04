@@ -1,30 +1,29 @@
 import pandas as pd
-import os
+import glob
 
-# data folder path
-data_folder = "data"
+files = glob.glob("data/*.csv")
 
-# all csv files
-files = os.listdir(data_folder)
+dfs = []
 
-# empty dataframe
-sales_data = pd.DataFrame()
-
-# combine all csv files
 for file in files:
-    if file.endswith(".csv"):
-        df = pd.read_csv(os.path.join(data_folder, file))
-        sales_data = pd.concat([sales_data, df], ignore_index=True)
+    df = pd.read_csv(file)
 
-# show first rows
-print("Data Preview:")
-print(sales_data.head())
+    # Keep only Pink Morsels
+    df = df[df["product"] == "pink morsels"]
 
-# show columns
-print("\nColumns:")
-print(sales_data.columns)
+    # Create Sales column
+    df["Sales"] = df["quantity"] * df["price"]
 
-# save processed data
-sales_data.to_csv("processed_sales_data.csv", index=False)
+    # Keep required columns
+    df = df[["Sales", "date", "region"]]
 
-print("\nData processing completed!")
+    # Rename columns
+    df.columns = ["Sales", "Date", "Region"]
+
+    dfs.append(df)
+
+final_df = pd.concat(dfs, ignore_index=True)
+
+final_df.to_csv("processed_sales_data.csv", index=False)
+
+print("processed_sales_data.csv created successfully!")
